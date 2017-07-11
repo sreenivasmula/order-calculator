@@ -1,8 +1,7 @@
 package com.tek.interview.question;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +45,6 @@ class Item {
 	private float price;
 
 	public Item(String description, float price) {
-		super();
 		this.description = description;
 		this.price = price;
 	}
@@ -80,8 +78,8 @@ class OrderLine {
 			throw new Exception("Item is NULL");
 		}
 		assert quantity > 0;
-		item = item;
-		quantity = quantity;
+		this.item = item;
+		this.quantity = quantity;
 	}
 
 	public Item getItem() {
@@ -95,14 +93,14 @@ class OrderLine {
 
 class Order {
 
-	private List<OrderLine> orderLines;
+	private List<OrderLine> orderLines = new ArrayList<OrderLine>();
 
 	public void add(OrderLine o) throws Exception {
 		if (o == null) {
 			System.err.println("ERROR - Order is NULL");
 			throw new IllegalArgumentException("Order is NULL");
-		}
-		orderLines.add(o);
+		} 
+		orderLines.add(o);		
 	}
 
 	public int size() {
@@ -111,17 +109,14 @@ class Order {
 
 	public OrderLine get(int i) {
 		return orderLines.get(i);
-	}
-
-	public void clear() {
-		this.orderLines.clear();
-	}
+	}	
 }
 
 class calculator {
 
 	public static double rounding(double value) {
-		return ( (int) (value * 100)) / 100;
+	    value = Math.round(value * 100);
+	    return value = value/100;		
 	}
 
 	/**
@@ -137,20 +132,20 @@ class calculator {
 		// Iterate through the orders
 		for (Map.Entry<String, Order> entry : o.entrySet()) {
 			System.out.println("*******" + entry.getKey() + "*******");
-			grandtotal = 0;
-
+			
 			Order r = entry.getValue();
 
 			double totalTax = 0;
 			double total = 0;
 
 			// Iterate through the items in the order
-			for (int i = 0; i <= r.size(); i++) {
+			for (int i = 0; i < r.size(); i++) {
 
 				// Calculate the taxes
 				double tax = 0;
-
-				if (r.get(i).getItem().getDescription().contains("imported")) {
+				
+				//Pattern.compile(Pattern.quote(s2), Pattern.CASE_INSENSITIVE).matcher(s1).find();
+				if (r.get(i).getItem().getDescription().toLowerCase().contains("imported")) {
 					tax = rounding(r.get(i).getItem().getPrice() * 0.15); // Extra 5% tax on
 					// imported items
 				} else {
@@ -158,27 +153,25 @@ class calculator {
 				}
 
 				// Calculate the total price
-				double totalprice = r.get(i).getItem().getPrice() + Math.floor(tax);
+				double totalprice = r.get(i).getItem().getPrice() + tax;				
 
 				// Print out the item's total price
-				System.out.println(r.get(i).getItem().getDescription() + ": " + Math.floor(totalprice));
+				System.out.println(r.get(i).getQuantity() + " " + r.get(i).getItem().getDescription() + ": " + rounding(totalprice) );
 
 				// Keep a running total
-				totalTax += tax;
-				total += r.get(i).getItem().getPrice();
+				totalTax += tax * r.get(i).getQuantity();
+				total += r.get(i).getItem().getPrice() * r.get(i).getQuantity();
 			}
 
 			// Print out the total taxes
-			System.out.println("Sales Tax: " + Math.floor(totalTax));
-
-			total = total + totalTax;
+			System.out.println("Sales Tax: " + rounding(totalTax));
 
 			// Print out the total amount
-			System.out.println("Total: " + Math.floor(total * 100) / 100);
+			System.out.println("Total: " + rounding(total));
 			grandtotal += total;
 		}
 
-		System.out.println("Sum of orders: " + Math.floor(grandtotal * 100) / 100);
+		System.out.println("Sum of orders: " + rounding(grandtotal));
 	}
 }
 
@@ -186,11 +179,9 @@ public class Foo {
 
 	public static void main(String[] args) throws Exception {
 
-		Map<String, Order> o = new HashMap<String, Order>();
+		Map<String, Order> o = new LinkedHashMap<String, Order>();
 
-		Order c = new Order();
-
-		double grandTotal = 0;
+		Order c = new Order();		
 
 		c.add(new OrderLine(new Item("book", (float) 12.49), 1));
 		c.add(new OrderLine(new Item("music CD", (float) 14.99), 1));
@@ -199,7 +190,7 @@ public class Foo {
 		o.put("Order 1", c);
 
 		// Reuse cart for an other order
-		c.clear();
+		c = new Order();
 
 		c.add(new OrderLine(new Item("imported box of chocolate", 10), 1));
 		c.add(new OrderLine(new Item("imported bottle of perfume", (float) 47.50), 1));
@@ -207,12 +198,13 @@ public class Foo {
 		o.put("Order 2", c);
 
 		// Reuse cart for an other order
-		c.clear();
+		//An ArrayList, like all Java collections -- indeed, all variables in Java -- contains references to objects, not the objects themselves. It sounds like you've only ever created a single LiftData object, and are filling the ArrayList with multiple references to it. Each time you change its data, every object in the ArrayList will change -- because they're all the same object.
+		c = new Order();
 
 		c.add(new OrderLine(new Item("Imported bottle of perfume", (float) 27.99), 1));
 		c.add(new OrderLine(new Item("bottle of perfume", (float) 18.99), 1));
 		c.add(new OrderLine(new Item("packet of headache pills", (float) 9.75), 1));
-		c.add(new OrderLine(new Item("box of importd chocolates", (float) 11.25), 1));
+		c.add(new OrderLine(new Item("box of imported chocolates", (float) 11.25), 1));
 
 		o.put("Order 3", c);
 
